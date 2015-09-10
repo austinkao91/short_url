@@ -1,0 +1,38 @@
+puts "Input Email:"
+email = gets.chomp
+
+until User.exists?(email: email)
+  puts "Invalid Email, please enter a valid email"
+  email = gets.chomp
+end
+current_user = User.find_by(email: email)
+
+puts "What do you want to do?"
+puts "0. Create shortened URL"
+puts "1. Visit shortened URL"
+
+choice = gets.chomp.to_i
+
+until choice == 1 || choice == 0
+  puts "Sorry, we did not understand your selection. Please enter 0 or 1 to"
+  puts "0. Create shortened URL"
+  puts "1. Visit shortened URL"
+  choice = gets.chomp.to_i
+end
+
+case choice
+when 0
+  puts "Type in your long url"
+  url = gets.chomp
+  ShortenedUrl.create!(current_user, url)
+when 1
+  puts "Type in the shortened URL"
+  url = gets.chomp
+  until ShortenedUrl.exists?(short_url: url)
+    puts "We do not have the short url in our database! Please try again"
+    url = gets.chomp
+  end
+  link = ShortenedUrl.find_by(short_url: "#{url}")
+  system "launchy #{link.long_url}"
+  Visit.record_visit(current_user, link)
+end
